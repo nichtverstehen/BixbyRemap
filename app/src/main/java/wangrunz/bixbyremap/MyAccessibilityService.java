@@ -34,9 +34,11 @@ import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
@@ -190,6 +192,12 @@ public class MyAccessibilityService extends AccessibilityService {
                 case "Voice Assistance":
                     startActivity(new Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     break;
+                case "Lock in Portrait":
+                    toggleOrientation(Surface.ROTATION_0);
+                    break;
+                case "Lock in Landscape":
+                    toggleOrientation(Surface.ROTATION_90);
+                    break;
             }
             return true;
         }
@@ -202,6 +210,19 @@ public class MyAccessibilityService extends AccessibilityService {
         else {
             return false;
         }
+    }
+
+    private void toggleOrientation(int wantedRotation) {
+      boolean auto = Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) != 0;
+      int current = Settings.System.getInt(getContentResolver(), Settings.System.USER_ROTATION, 0);
+      Log.d(getClass().getName(), String.format("toggleOrientation auto=%b preferred=%d wanted=%d",
+              auto, current, wantedRotation));
+      if (!auto && current == wantedRotation) {
+        Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 1);
+      } else {
+        Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0);
+        Settings.System.putInt(getContentResolver(), Settings.System.USER_ROTATION, wantedRotation);
+      }
     }
 
     private boolean mediaControl(String targetName) {

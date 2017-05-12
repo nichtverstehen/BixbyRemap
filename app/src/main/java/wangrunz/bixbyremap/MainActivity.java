@@ -44,6 +44,7 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.net.Uri;
 
 import org.w3c.dom.Text;
 
@@ -282,7 +283,8 @@ public class MainActivity extends AppCompatActivity {
         device_menu.add(R.id.menu_device_action,107,Menu.NONE,"Flash");
         device_menu.add(R.id.menu_device_action,108,Menu.NONE,"Ringer Mode");
         device_menu.add(R.id.menu_device_action,109,Menu.NONE,"Voice Assistance");
-
+        device_menu.add(R.id.menu_device_action,110,Menu.NONE,"Lock in Portrait");
+        device_menu.add(R.id.menu_device_action,111,Menu.NONE,"Lock in Landscape");
 
         SubMenu media_menu = menu.getItem(1).getSubMenu();
 
@@ -310,6 +312,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 SharedPreferences.Editor edit = sharedPreferences.edit();
+
+                if (item.getItemId()==110 || item.getItemId()==111) {
+                  requestSettingsPermission();
+                }
+
                 if (item.getItemId()<100){
                     return false;
                 }
@@ -350,6 +357,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         popupMenu.show();
+    }
+
+    void requestSettingsPermission() {
+      if (!Settings.System.canWrite(this)) {
+        startActivity(new Intent(
+                Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                Uri.parse("package:" + getPackageName())));
+      }
     }
 
     void runUpdatesIfNecessary() {
